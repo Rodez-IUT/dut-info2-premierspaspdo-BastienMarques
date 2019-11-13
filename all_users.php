@@ -5,7 +5,6 @@
 		<meta charset="UTF-8">		
 	</HEAD>
 	<BODY>
-		<table>
 			<?php 
 				$host = 'localhost';
 				$db   = 'my_activities';
@@ -25,36 +24,15 @@
 				}
 				
 			?>
-				<tr>
-					<td>
-						<?php   
-							$stmt = $pdo->query('SELECT id FROM users');
-							while ($row = $stmt->fetch())
-							{
-    							echo $row['id'] . "\n";
-							}
-						?>
-					</td>
-					<td>
-						<?php
-							$stmt = $pdo->query('SELECT username FROM users');
-							while ($row = $stmt->fetch())
-							{
-    							echo $row['username'] . "\n";
-							}						
-						?>
-					</td>
-					<td>
-						<?php
-							$stmt = $pdo->query('SELECT email FROM users');
-							while ($row = $stmt->fetch())
-							{
-    							echo $row['email'] . "\n";
-							}						
-						?>
-					</td>
-				</tr>
-			<?php ?>
+		<table>
+			<?php   
+				$stmt = $pdo->query('SELECT * FROM users U JOIN status S ON S.id = U.status_id ORDER BY username	');
+				echo '<tr><th>Id</th><th>Username</th><th>email</th><th>Status</th></tr>';
+				while ($row = $stmt->fetch())
+				{				
+    				echo '<tr><td>'.$row['id'].'</td><td>'.$row['username'].'</td><td>'.$row['email'].'</td><td>'.$row['name'].'</td></tr>';
+				}
+			?>
 		</table>
 	</BODY>
 </HTML>
