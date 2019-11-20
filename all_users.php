@@ -27,7 +27,15 @@
 			?>
 		<table>
 			<?php   
-				$stmt = $pdo->query('SELECT * FROM users U JOIN status S ON S.id = U.status_id ORDER BY username');
+				$wStatus = 2;
+				$wUser = 'e%';
+				$stmt = $pdo->query("SELECT * 
+									FROM users U 
+									JOIN status S 
+									ON S.id = U.status_id 
+									WHERE U.username LIKE '$wUser' 
+									AND S.id = '$wStatus' 
+									ORDER BY username");
 				echo '<tr><th>Id</th><th>Username</th><th>email</th><th>Status</th></tr>';
 				while ($row = $stmt->fetch())
 				{				
