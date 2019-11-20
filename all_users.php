@@ -24,19 +24,37 @@
     				throw new PDOException($e->getMessage(), (int)$e->getCode());
 				}
 				
+				function get($name) {
+					return isset($_GET[$name]) ? $_GET[$name] : null;
+					}
 			?>
+		<form action="all_users.php" method="get">
+			Start with letter:
+			<input name="start_letter" type="text" value="<?php echo get("start_letter") ?>">
+			and status is:
+			<select name="status_id">
+				<option value="1" <?php if (get("status_id") == 1) echo 'selected' ?>>Waiting for account validation</option>
+				<option value="2" <?php if (get("status_id") == 2) echo 'selected' ?>>Active account</option>
+			</select>
+			<input type="submit" value="OK">
+		</form>
 		<table>
-			<?php   
-				$wStatus = 2;
-				$wUser = 'e%';
-				$stmt = $pdo->query("SELECT * 
-									FROM users U 
-									JOIN status S 
-									ON S.id = U.status_id 
-									WHERE U.username LIKE '$wUser' 
-									AND S.id = '$wStatus' 
+			<tr>
+				<th>Id</th>
+				<th>Username</th>
+				<th>email</th>
+				<th>Status</th>
+			</tr>';
+			<?php
+				$wUser = htmlspecialchars(get("start_letter"));
+				$wStatus = $_GET["status"];
+				$stmt = $pdo->query("SELECT *
+									FROM users U
+									JOIN status S
+									ON S.id = U.status_id
+									WHERE U.username LIKE '$wUser%'
+									AND S.id = '$wStatus'
 									ORDER BY username");
-				echo '<tr><th>Id</th><th>Username</th><th>email</th><th>Status</th></tr>';
 				while ($row = $stmt->fetch())
 				{				
     				echo '<tr><td>'.$row['id'].'</td><td>'.$row['username'].'</td><td>'.$row['email'].'</td><td>'.$row['name'].'</td></tr>';
