@@ -76,6 +76,9 @@ $stmt->execute(['start_letter' => $start_letter, 'status_id' => $status_id]);
             <td><?php echo $row['username'] ?></td>
             <td><?php echo $row['email'] ?></td>
             <td><?php echo $row['status'] ?></td>
+			<?php if (get("status_id") != 3) {?>
+			<td><a href="all_users.php?status_id=3&user_id=<?php echo $status_id?>&action=askDeletion">ask Deletion</a></td>
+			<?php }?>
         </tr>
     <?php } ?>
 </table>
