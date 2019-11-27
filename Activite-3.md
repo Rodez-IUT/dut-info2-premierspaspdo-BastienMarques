@@ -1,0 +1,1 @@
+La chaîne ca caractère rentrée dans le formulaire est directement inserée via la variable dans la requête SQL faites à la BD.
