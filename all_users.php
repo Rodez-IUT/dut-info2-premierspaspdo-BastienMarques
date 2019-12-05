@@ -39,11 +39,48 @@ try {
 function get($name) {
     return isset($_GET[$name]) ? $_GET[$name] : null;
 }
+
+// set action to trigger
+$action = get('action') ?: 'searchUsers';
+$searchStmt = null;
+
+// trigger the appropriate action
+$action($pdo);
+
+function searchUsers($pdo){
+    global $searchStmt;
+    $status_id = (int)get('status_id') ?: 2;
+    $start_letter = htmlspecialchars(get('start_letter') . '%') ?: '%';
+    $sql = "select users.id as user_id, username, email, s.name as status, s.id as status_id 
+            from users join status s on users.status_id = s.id 
+            where username like :start_letter and status_id = :status_id order by username";
+    $searchStmt = $pdo->prepare($sql);
+    $searchStmt->execute(['start_letter' => $start_letter, 'status_id' => $status_id]);
+}
+
+function askDeletion($pdo){
+    $user_id = (int)get("user_id");
+    // insert log
+    $sql2 = "insert into action_log (action_date, action_name, user_id) 
+              values (CURRENT_TIME(),'askDeletion',?)";
+    $stmt2 = $pdo->prepare($sql2);
+    $stmt2->execute([$user_id]);
+
+    // update user
+    //throw new Exception("erreur !");
+    $sql1 = "update users set status_id = 3 where id = ?";
+    $stmt1 = $pdo->prepare($sql1);
+    $stmt1->execute([$user_id]);
+    
+    // update user list
+    searchUsers($pdo);
+}
 ?>
 
 <h1>All Users</h1>
 
 <form action="all_users.php" method="get">
+    <input hidden name="action" value="searchUsers">
     Start with letter:
     <input name="start_letter" type="text" value="<?php echo get("start_letter") ?>">
     and status is:
@@ -55,14 +92,6 @@ function get($name) {
     <input type="submit" value="OK">
 </form>
 
-<?php
-$start_letter = htmlspecialchars(get("start_letter").'%');
-$status_id = (int)get("status_id");
-$sql = "select users.id as user_id, username, email, s.name as status from users join status s on users.status_id = s.id where username like :start_letter and status_id = :status_id order by username";
-$stmt = $pdo->prepare($sql);
-$stmt->execute(['start_letter' => $start_letter, 'status_id' => $status_id]);
-
-?>
 <table>
     <tr>
         <th>Id</th>
@@ -70,14 +99,14 @@ $stmt->execute(['start_letter' => $start_letter, 'status_id' => $status_id]);
         <th>Email</th>
         <th>Status</th>
     </tr>
-    <?php while ($row = $stmt->fetch()) { ?>
+    <?php while ($row = $searchStmt->fetch()) { ?>
         <tr>
             <td><?php echo $row['user_id'] ?></td>
             <td><?php echo $row['username'] ?></td>
             <td><?php echo $row['email'] ?></td>
             <td><?php echo $row['status'] ?></td>
 			<?php if (get("status_id") != 3) {?>
-			<td><a href="all_users.php?status_id=3&user_id=<?php echo $status_id?>&action=askDeletion">ask Deletion</a></td>
+			<td><a href="all_users.php?status_id=3&user_id=<?php echo $row['user_id']?>&action=askDeletion">ask Deletion</a></td>
 			<?php }?>
         </tr>
     <?php } ?>
